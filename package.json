@@ -1,0 +1,34 @@
+{
+    "name": "obviel-bootstrap",
+    "version": "0.0.1",
+    "description": "Bootstrap integration for Obviel",
+    "keywords" : ["obviel", "bootstrap", "widgets"],
+    "homepage": "http://github.com/robgietema/obviel-bootstrap",
+    "author": "Rob Gietema",
+    "contributors": [{
+        "name": "Rob Gietema",
+        "email": "rob.gietema@gmail.com"
+    }],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/robgietema/obviel-bootstrap.git"
+    },
+    "bugs" : "http://github.com/robgietema/obviel-bootstrap/issues",
+    "scripts": {
+        "test": "./node_modules/buster/bin/buster-test"
+    },
+    "devDependencies": {
+        "buster": "~0.6.2",
+        "buster-lint": "~0.3.1",
+        "buster-coverage": "~0.1.0"
+    },
+    "licenses" : [
+        {
+            "type" : "GPLv3",
+            "url" : "http://www.gnu.org/licenses/gpl-3.0.html"
+        }
+    ],
+    "engines" : {
+        "node" : "~0.6"
+    }
+}
