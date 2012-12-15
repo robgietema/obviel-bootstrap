@@ -201,8 +201,10 @@ $(document).ready(function() {
                         }, {
                             title: 'Tab 2',
                             content: {
-                                iface: 'textlineCell',
-                                value: 'Todo'
+                                iface: 'image',
+                                src: 'rob.gietema@gmail.com',
+                                type: 'rounded',
+                                gravatar: true
                             }
                         }, {
                             title: 'Tab 3',
