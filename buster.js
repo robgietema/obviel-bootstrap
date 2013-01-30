@@ -26,7 +26,7 @@ config["Obviel Bootstrap"] = {
         "test/test-obviel-bootstrap.js"
     ],
     extensions: [
-        require('buster-lint'),
+        require('buster-lint')
     ],
     "buster-lint": linterConf
 }
