@@ -1044,6 +1044,30 @@ buster.testCase("Obviel Bootstrap Navbar Tests", {
 
         assert($('div.tabbable > *:first', el).is('div'));
         assert($('div.tabbable > *:last', el).is('ul'));
+    },
+
+    'document with multiple tabs': function () {
+        var el = $('#viewdiv');
+
+        $(document.body).append('<div id="tab1"></div>');
+
+        obviel.view({
+            iface: 'dummy',
+            obvt: '{content}'
+        });
+        el.render({
+            iface: 'tabs',
+            items: [{
+                title: 'Tab1',
+                content: {
+                    iface: 'dummy',
+                    content: 'Tab1 Content'
+                }
+            }]
+        });
+
+        assert.equals($('.tab-pane:first', el).attr('id'), 'tab2');
+        $('#tab1').remove();
     }
 });
 
