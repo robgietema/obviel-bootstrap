@@ -14,9 +14,9 @@ var linterConf = {
 config["Obviel Bootstrap"] = {
     environment: "browser",
     libs: [
-        "libs/jquery/1.8.3/jquery.js",
-        "libs/obviel/1.0b3/obviel-template.js",
-        "libs/obviel/1.0b3/obviel.js",
+        "libs/jquery/1.9.1/jquery.js",
+        "libs/obviel/1.0b6/obviel-template.js",
+        "libs/obviel/1.0b6/obviel.js",
         "libs/jshash/2.2/md5.js"
     ],
     sources: [

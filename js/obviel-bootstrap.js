@@ -13,7 +13,8 @@ obviel.bootstrap = {};
             iface: 'app',
             name: 'default',
             obvt:
-                '<div data-if="parts" data-each="parts" data-view="@."></div>'
+                '<div data-if="parts" data-repeat="parts" data-render="@.">' +
+                '</div>'
         };
         $.extend(d, settings);
         obviel.View.call(this, d);
@@ -32,10 +33,10 @@ obviel.bootstrap = {};
             iface: 'container',
             name: 'default',
             obvt:
-                '<div data-func="layout">' +
+                '<div data-call="layout">' +
                 '  <div data-if="parts"' +
-                '       data-each="parts"' +
-                '       data-view="@."></div>' +
+                '       data-repeat="parts"' +
+                '       data-render="@."></div>' +
                 '</div>',
             layout: function (el) {
                 if (this.obj.fluid) {
@@ -62,9 +63,9 @@ obviel.bootstrap = {};
             iface: 'grid',
             name: 'default',
             obvt:
-                '<div data-if="rows" data-each="rows" data-func="row">' +
-                '  <div data-if="columns" data-each="columns" ' +
-                'data-func="column" data-view="@."></div>' +
+                '<div data-if="rows" data-repeat="rows" data-call="row">' +
+                '  <div data-if="columns" data-repeat="columns" ' +
+                'data-call="column" data-render="@."></div>' +
                 '</div>',
             row: function (el, variable) {
                 if (variable('fluid')) {
@@ -101,23 +102,25 @@ obviel.bootstrap = {};
             iface: 'table',
             name: 'default',
             obvt:
-                '<table class="table" data-func="optionals">' +
+                '<table class="table" data-call="optionals">' +
                 '  <caption data-if="table.caption">' +
                 '    {table.caption}' +
                 '  </caption>' +
                 '  <thead data-if="table.headers">' +
                 '    <tr>' +
-                '      <th data-each="table.headers" data-view="@."></th>' +
+                '      <th data-repeat="table.headers" data-render="@.">' +
+                '      </th>' +
                 '    </tr>' +
                 '  </thead>' +
                 '  <tfoot data-if="table.footer">' +
                 '    <tr>' +
-                '      <th data-each="table.headers" data-view="@."></th>' +
+                '      <th data-repeat="table.headers" data-render="@.">' +
+                '      </th>' +
                 '    </tr>' +
                 '  </tfoot>' +
                 '  <tbody data-if="table.rows">' +
-                '    <tr data-each="table.rows" data-func="rowclass">' +
-                '      <td data-each="cells" data-view="@."></td>' +
+                '    <tr data-repeat="table.rows" data-call="rowclass">' +
+                '      <td data-repeat="cells" data-render="@."></td>' +
                 '    </tr>' +
                 '  </tbody>' +
                 '</table>',
@@ -231,15 +234,15 @@ obviel.bootstrap = {};
             iface: 'breadcrumbs',
             name: 'default',
             obvt: '<ul class="breadcrumb">' +
-                  '<li data-if="items" data-each="items" ' +
-                  'data-func="itemclass">' +
-                  '<a href="#" data-if="!@each.last">{@.}</a>' +
-                  '<span data-if="!@each.last" class="divider">/</span>' +
-                  '<span data-unwrap="" data-if="@each.last">{@.}</span>' +
+                  '<li data-if="items" data-repeat="items" ' +
+                  'data-call="itemclass">' +
+                  '<a href="#" data-if="!@repeat.last">{@.}</a>' +
+                  '<span data-if="!@repeat.last" class="divider">/</span>' +
+                  '<span data-unwrap="" data-if="@repeat.last">{@.}</span>' +
                   '</li>' +
                   '</ul>',
             itemclass: function (el, variable) {
-                if (variable('@each.number') === variable('@each.length')) {
+                if (variable('@repeat.number') === variable('@repeat.length')) {
                     el.addClass('active');
                 }
             }
@@ -261,7 +264,7 @@ obviel.bootstrap = {};
         var d = {
             iface: 'alert',
             name: 'default',
-            obvt: '<div data-func="alertclass" class="alert">' +
+            obvt: '<div data-call="alertclass" class="alert">' +
                   '<button type="button" class="close" data-dismiss="alert">' +
                   '×</button>' +
                   '<div data-if="title" data-unwrap="">' +
@@ -298,7 +301,7 @@ obviel.bootstrap = {};
             iface: 'navbar',
             name: 'default',
             obvt:
-                '<div class="navbar" data-func="optionals">' +
+                '<div class="navbar" data-call="optionals">' +
                 '  <div class="navbar-inner">' +
                 '    <div class="container">' +
                 '      <a class="btn btn-navbar"' +
@@ -313,8 +316,8 @@ obviel.bootstrap = {};
                 '         data-if="navbar.brand">{navbar.brand}</a>' +
                 '      <div class="nav-collapse"' +
                 '           data-if="navbar.parts"' +
-                '           data-each="navbar.parts"' +
-                '           data-view="@."></div>' +
+                '           data-repeat="navbar.parts"' +
+                '           data-render="@."></div>' +
                 '    </div>' +
                 '  </div>' +
                 '</div>',
@@ -347,23 +350,23 @@ obviel.bootstrap = {};
             iface: 'tabs',
             name: 'default',
             obvt:
-                '<div class="tabbable" data-func="position">' +
+                '<div class="tabbable" data-call="position">' +
                 '  <ul class="nav nav-tabs" data-if="items">' +
-                '    <li data-each="items" data-func="active">' +
+                '    <li data-repeat="items" data-call="active">' +
                 '      <a data-toggle="tab"' +
                 '         href="#{id}">{title}</a>' +
                 '    </li>' +
                 '  </ul>' +
                 '  <div class="tab-content" data-if="items">' +
-                '    <div data-each="items"' +
-                '         data-view="content"' +
+                '    <div data-repeat="items"' +
+                '         data-render="content"' +
                 '         class="tab-pane"' +
-                '         data-func="active"' +
+                '         data-call="active"' +
                 '         data-id="{id}"></div>' +
                 '  </div>' +
                 '</div>',
             active: function (el, variable) {
-                if (this.obj.active === variable('@each.index')) {
+                if (this.obj.active === variable('@repeat.index')) {
                     el.addClass('active');
                 }
             },
@@ -419,10 +422,10 @@ obviel.bootstrap = {};
             iface: 'nav',
             name: 'default',
             obvt:
-                '<ul class="nav" data-func="optionals">' +
+                '<ul class="nav" data-call="optionals">' +
                 '  <li data-if="items"' +
-                '      data-each="items"' +
-                '      data-view="@."></li>' +
+                '      data-repeat="items"' +
+                '      data-render="@."></li>' +
                 '</ul>',
             optionals: function (el) {
                 if (this.obj.align) {
@@ -458,8 +461,8 @@ obviel.bootstrap = {};
                 '<ul data-if="items"' +
                 '    class="dropdown-menu">' +
                 '  <li data-if="items"' +
-                '      data-each="items"' +
-                '      data-view="@."></li>' +
+                '      data-repeat="items"' +
+                '      data-render="@."></li>' +
                 '</ul>',
         };
 
@@ -499,11 +502,11 @@ obviel.bootstrap = {};
                 '  {title} <b class="caret"></b>' +
                 '</a>' +
                 '<ul data-if="items"' +
-                '    data-func="align"' +
+                '    data-call="align"' +
                 '    class="dropdown-menu">' +
                 '  <li data-if="items"' +
-                '      data-each="items"' +
-                '      data-view="@."></li>' +
+                '      data-repeat="items"' +
+                '      data-render="@."></li>' +
                 '</ul>',
             align: function (el) {
                 if (this.obj.align) {
@@ -582,7 +585,7 @@ obviel.bootstrap = {};
             iface: 'navbarSearch',
             name: 'default',
             obvt:
-                '<form class="navbar-search" data-func="align">' +
+                '<form class="navbar-search" data-call="align">' +
                 '  <input type="text"' +
                 '         class="search-query"' +
                 '         placeholder="{placeholder}" />' +
@@ -611,7 +614,7 @@ obviel.bootstrap = {};
             d = {
             iface: 'image',
             name: 'default',
-            obvt: '<img data-func="optionals"/>',
+            obvt: '<img data-call="optionals"/>',
             optionals: function (el) {
                 var src, params = [];
                 if (this.obj.type) {

@@ -13,7 +13,7 @@ There are two phases:
 How does compilation work?
 
 * a separated Section is compiled for each data-with, data-if and
-  data-each element, or combinations thereof.
+  data-repeat element, or combinations thereof.
 
 * Sections are organized in a tree; each section may have
   sub-sections. The template itself starts with a single Section at
@@ -74,6 +74,16 @@ obviel.template = {};
     // these attributes may not be dynamic, you can only
     // set them dynamically thorugh data-<attrName>
     var SPECIAL_ATTR = {'id': true,  'src': true};
+
+    // special classes that need to be retained even if we have
+    // dynamic class attribute (class="{foo}") as otherwise
+    // Obviel will break. obviel-template-removal is not in this
+    // list because a dynamic class element won't break it anyway,
+    // as it will never get rendered in the first place
+    var SPECIAL_CLASSES = ['obviel-template-special-attr',
+                           'obviel-template-data-el',
+                           'obviel-template-data-unwrap'
+                          ];
     
     module.CompilationError = function(el, message) {
         this.name = 'CompilationError';
@@ -159,7 +169,7 @@ obviel.template = {};
 
         // setting attributes with data (data-id, data-src) become
         // that attribute (id, src)
-        $('.obviel-template-special-attr', el).each(function() {
+        $('*.obviel-template-special-attr', el).each(function() {
             var name, value;
 
             for (name in SPECIAL_ATTR) {
@@ -195,7 +205,7 @@ obviel.template = {};
             this.parentNode.removeChild(this);
         });
 
-        // need to wait until data-view triggered views are done
+        // need to wait until data-render triggered views are done
         return $.when.apply(null, context.subviewPromises);
     };
     
@@ -204,9 +214,9 @@ obviel.template = {};
 
         var dataIf = getDirective(el, 'data-if');
         var dataWith = getDirective(el, 'data-with');
-        var dataEach = getDirective(el, 'data-each');
+        var dataRepeat = getDirective(el, 'data-repeat');
         
-        if (!rootSection && !dataIf && !dataWith && !dataEach) {
+        if (!rootSection && !dataIf && !dataWith && !dataRepeat) {
             this.dynamic = false;
             return;
         }
@@ -225,18 +235,18 @@ obviel.template = {};
         } else {
             this.dataWith = null;
         }
-        if (dataEach) {
-            validateDottedName(el, dataEach);
-            this.dataEach = module.resolveFunc(dataEach);
-            this.dataEachName = dataEach.replace('.', '_');
+        if (dataRepeat) {
+            validateDottedName(el, dataRepeat);
+            this.dataRepeat = module.resolveFunc(dataRepeat);
+            this.dataRepeatName = dataRepeat.replace('.', '_');
         } else {
-            this.dataEach = null;
+            this.dataRepeat = null;
         }
 
         //this.elFuncs = { funcs: [], sub: {} };
         
         this.dynamicElements = [];
-        this.viewElements = [];
+        this.renderElements = [];
         this.subSections = [];
         this.compile(el);
     };
@@ -257,8 +267,8 @@ obviel.template = {};
             return;
         }
 
-        // compile any view on top element
-        this.compileView(el);
+        // compile any render on top element
+        this.compileRender(el);
         
         // now compile sub-elements
         for (var i = 0; i < el.childNodes.length; i++) {
@@ -303,7 +313,7 @@ obviel.template = {};
             return;
         }
 
-        this.compileView(el);
+        this.compileRender(el);
 
         for (var i = 0; i < el.childNodes.length; i++) {
             var node = el.childNodes[i];
@@ -370,16 +380,16 @@ obviel.template = {};
         return c.getFunction();
     };
     
-    module.Section.prototype.compileView = function(el) {
-        var viewElement = new module.ViewElement(el);
+    module.Section.prototype.compileRender = function(el) {
+        var renderElement = new module.RenderElement(el);
 
-        if (!viewElement.isDynamic()) {
+        if (!renderElement.isDynamic()) {
             return;
         }
         
-        this.viewElements.push({
+        this.renderElements.push({
             finder: this.getElFinder(el),
-            viewElement: viewElement
+            renderElement: renderElement
         });
     };
     
@@ -415,8 +425,8 @@ obviel.template = {};
             }
         }
 
-        if (this.dataEach) {
-            this.renderEach(el, scope, context);
+        if (this.dataRepeat) {
+            this.renderRepeat(el, scope, context);
         } else {
             this.renderEl(el, scope, context);
         }
@@ -429,34 +439,34 @@ obviel.template = {};
         this.render(topEl, scope, context);
     };
     
-    var eachInfo = function(index, name, dataEach) {
+    var repeatInfo = function(index, name, dataRepeat) {
         var even = index % 2 === 0;
         var info = {
             index: index,
             number: index + 1,
-            length: dataEach.length,
+            length: dataRepeat.length,
             even: even,
             odd: !even,
-            last: index + 1 === dataEach.length,
+            last: index + 1 === dataRepeat.length,
             first: index === 0
         };
-        var each = {};
-        $.extend(each, info);
-        each[name] = info;
+        var repeat = {};
+        $.extend(repeat, info);
+        repeat[name] = info;
         return {
-            '@each': each
+            '@repeat': repeat
         };
     };
     
-    module.Section.prototype.renderEach = function(el, scope, context) {
-        var dataEach = this.dataEach(scope);
-        if (!$.isArray(dataEach)) {
+    module.Section.prototype.renderRepeat = function(el, scope, context) {
+        var dataRepeat = this.dataRepeat(scope);
+        if (!$.isArray(dataRepeat)) {
             throw new module.RenderError(
-                el, ("data-each must point to an array, not to " +
-                     $.type(dataEach)));
+                el, ("data-repeat must point to an array, not to " +
+                     $.type(dataRepeat)));
         }
         // empty array, so don't render any elements
-        if (dataEach.length === 0) {
+        if (dataRepeat.length === 0) {
             el.parentNode.removeChild(el);
             return;
         }
@@ -471,19 +481,19 @@ obviel.template = {};
         var parentNode = el.parentNode;
 
         // render the first iteration on the element
-        scope.push(eachInfo(0, this.dataEachName, dataEach));
-        scope.push(dataEach[0]);
+        scope.push(repeatInfo(0, this.dataRepeatName, dataRepeat));
+        scope.push(dataRepeat[0]);
         this.renderEl(el, scope, context);
         scope.pop();
         scope.pop();
 
         // now insert the next iterations after the first iteration
-        for (var i = 1; i < dataEach.length; i++) {
+        for (var i = 1; i < dataRepeat.length; i++) {
             var iterationClone = iterationNode.cloneNode(false);
             parentNode.insertBefore(iterationClone, insertBeforeNode);
 
-            scope.push(eachInfo(i, this.dataEachName, dataEach));
-            scope.push(dataEach[i]);
+            scope.push(repeatInfo(i, this.dataRepeatName, dataRepeat));
+            scope.push(dataRepeat[i]);
             this.renderEl(iterationClone, scope, context);
             scope.pop();
             scope.pop();
@@ -529,10 +539,10 @@ obviel.template = {};
 
     module.Section.prototype.renderViews = function(el, scope,
                                                      context) {
-        for (var i in this.viewElements) {
-            var value = this.viewElements[i];
-            var viewEl = value.finder(el);
-            value.viewElement.render(viewEl, scope, context);
+        for (var i in this.renderElements) {
+            var value = this.renderElements[i];
+            var renderEl = value.finder(el);
+            value.renderElement.render(renderEl, scope, context);
         }
     };
 
@@ -540,7 +550,7 @@ obviel.template = {};
                                                             context) {
         var toRender = [];
         // first we find all elements. we do this before rendering starts,
-        // as rendering can in some cases (data-each) insert new elements
+        // as rendering can in some cases (data-repeat) insert new elements
         // and that would break the finding
         for (var i in this.subSections) {
             toRender.push({value: this.subSections[i],
@@ -574,8 +584,8 @@ obviel.template = {};
         
         this.compileAttrTexts(el);
         this.compileContentTexts(el);
-        this.compileDataHandler(el);
-        this.compileFunc(el);
+        this.compileDataOn(el);
+        this.compileCall(el);
         this.compileSpecialAttr(el);
         this.compileDataEl(el);
         this.compileDataAttr(el);
@@ -627,22 +637,22 @@ obviel.template = {};
         }
     };
     
-    module.DynamicElement.prototype.compileDataHandler = function(el) {
-        var dataHandler = getDirective(el, 'data-handler');
-        if (dataHandler === null) {
+    module.DynamicElement.prototype.compileDataOn = function(el) {
+        var dataOn = getDirective(el, 'data-on');
+        if (dataOn === null) {
             return;
         }
-        var nameFormatters = splitNameFormatters(el, dataHandler);
+        var nameFormatters = splitNameFormatters(el, dataOn);
         if (nameFormatters.length === 0) {
             throw new module.CompilationError(
-                el, 'data-handler: must have content');
+                el, 'data-on: must have content');
         }
         for (var i = 0; i < nameFormatters.length; i++) {
             var nameFormatter = nameFormatters[i];
     
             if (!nameFormatter.formatter) {
                 throw new module.CompilationError(
-                    el, "data-handler: handler function name is not specified");
+                    el, "data-on: handler function name is not specified");
             }
             this.handlers.push({eventName: nameFormatter.name,
                                 handlerName: nameFormatter.formatter});
@@ -650,8 +660,8 @@ obviel.template = {};
         this._dynamic = true;
     };
     
-    module.DynamicElement.prototype.compileFunc = function(el) {
-        var funcName = getDirective(el, 'data-func');
+    module.DynamicElement.prototype.compileCall = function(el) {
+        var funcName = getDirective(el, 'data-call');
         if (funcName === null) {
             return;
         }
@@ -839,7 +849,7 @@ obviel.template = {};
         parent.attr(name, value);
     };
 
-    module.DynamicElement.prototype.renderDataHandler = function(
+    module.DynamicElement.prototype.renderDataOn = function(
         el, context) {
         if (this.handlers.length === 0) {
             return;
@@ -850,7 +860,7 @@ obviel.template = {};
             if (context.getHandler === null ||
                 context.getHandler === undefined) {
                 throw new module.RenderError(
-                    el, "cannot render data-handler for event '" +
+                    el, "cannot render data-on for event '" +
                         handler.eventName + "' and handler '" +
                         handler.handlerName +
                         "' because no getHandler function " +
@@ -859,7 +869,7 @@ obviel.template = {};
             var f = context.getHandler(handler.handlerName);
             if (f === undefined || f === null) {
                 throw new module.RenderError(
-                    el, "cannot render data-handler for event '" +
+                    el, "cannot render data-on for event '" +
                         handler.eventName + "' and handler '" +
                         handler.handlerName + "' because handler function " +
                         "could not be found");
@@ -868,7 +878,7 @@ obviel.template = {};
         }
     };
     
-    module.DynamicElement.prototype.renderDataFunc = function(
+    module.DynamicElement.prototype.renderDataCall = function(
         el, scope, context) {
         if (this.funcName === null) {
             return;
@@ -876,7 +886,7 @@ obviel.template = {};
         var func = context.getFunc(this.funcName);
         if (!func) {
             throw new module.RenderError(
-                el, 'cannot render data-func because cannot find func: ' +
+                el, 'cannot render data-call because cannot find function: ' +
                     this.funcName);
         }
         func($(el),
@@ -888,8 +898,8 @@ obviel.template = {};
     module.DynamicElement.prototype.finalizeRender = function(
         el, scope, context) {
         this.renderDataAttr(el);
-        this.renderDataHandler(el, context);
-        this.renderDataFunc(el, scope, context);
+        this.renderDataOn(el, context);
+        this.renderDataCall(el, scope, context);
     };
     
     module.DynamicText = function(el, text) {
@@ -1023,8 +1033,36 @@ obviel.template = {};
     
     module.DynamicAttribute.prototype.renderNotrans = function(
         el, scope, context) {
+        var classes = this.getSpecialClasses(el);
         el.setAttribute(this.name,
                         this.dynamicText.render(el, scope, context));
+        this.restoreSpecialClasses(el, classes);
+    };
+    
+    module.DynamicAttribute.prototype.getSpecialClasses = function(el) {
+        var i = 0,
+            specialClass,
+            wrapped,
+            classes = [];
+        if (this.name === 'class') {
+            wrapped = $(el);
+            for (i = 0; i < SPECIAL_CLASSES.length; i++) {
+                specialClass = SPECIAL_CLASSES[i];
+                if (wrapped.hasClass(specialClass)) {
+                    classes.push(specialClass);
+                }
+            }
+        }
+        return classes;
+    };
+
+    module.DynamicAttribute.prototype.restoreSpecialClasses = function(
+        el, classes) {
+        var i = 0,
+            wrapped = $(el);
+        for (i = 0; i < classes.length; i++) {
+            wrapped.addClass(classes[i]);
+        }
     };
     
     module.Variable = function(el, name) {
@@ -1061,15 +1099,15 @@ obviel.template = {};
         return result;
     };
 
-    module.ViewElement = function(el) {
-        var dataView = getDirective(el, 'data-view');
-        if (dataView === null) {
+    module.RenderElement = function(el) {
+        var dataRender = getDirective(el, 'data-render');
+        if (dataRender === null) {
             this.dynamic = false;
             return;
         }
-        validateDottedName(el, dataView);
+        validateDottedName(el, dataRender);
         this.dynamic = true;
-        var r = splitNameFormatter(el, dataView);
+        var r = splitNameFormatter(el, dataRender);
         this.objName = r.name;
         this.getValue = module.resolveFunc(r.name);
         this.viewName = r.formatter;
@@ -1078,22 +1116,22 @@ obviel.template = {};
         }
     };
     
-    module.ViewElement.prototype.isDynamic = function() {
+    module.RenderElement.prototype.isDynamic = function() {
         return this.dynamic;
     };
 
-    module.ViewElement.prototype.render = function(el, scope, context) {
+    module.RenderElement.prototype.render = function(el, scope, context) {
         var obj = this.getValue(scope);
         if (obj === undefined) {
             throw new module.RenderError(
-                el, "data-view object '" + this.propertyName + "' " +
+                el, "data-render object '" + this.propertyName + "' " +
                     "could not be found");
         }
         var type = $.type(obj);
         if (type !== 'object' && type !== 'string') {
             throw new module.RenderError(
                 el,
-                "data-view must point to an object or string (URL), not to " + type);
+                "data-render must point to an object or string (URL), not to " + type);
         }
         
         // empty element
@@ -1121,10 +1159,10 @@ obviel.template = {};
 
     module.TransInfo.prototype.compile = function(el) {
         this.compileDataTrans(el);
-        if (this.content !== null && el.hasAttribute('data-view')) {
+        if (this.content !== null && el.hasAttribute('data-render')) {
             throw new module.CompilationError(
                 el,
-                "data-view not allowed when content is marked with data-trans");
+                "data-render not allowed when content is marked with data-trans");
         }
         this.compileDataTvar(el);
         this.compileDataPlural(el);
@@ -1415,7 +1453,7 @@ obviel.template = {};
                 index: index,
                 dynamic: new module.DynamicElement(tvarNode, true),
                 dynamicNotrans: new module.DynamicElement(node, true),
-                view: tvarInfo.view
+                render: tvarInfo.render
             };
         }
         // COMMENTNODE
@@ -1458,10 +1496,10 @@ obviel.template = {};
                 el,
                 "inside data-trans element data-with may not be used");
         }
-        if (el.hasAttribute('data-each')) {
+        if (el.hasAttribute('data-repeat')) {
             throw new module.CompilationError(
                 el,
-                "inside data-trans element data-each may not be used");
+                "inside data-trans element data-repeat may not be used");
         }
     };
     
@@ -1509,10 +1547,10 @@ obviel.template = {};
         checkMessageId(el, messageId, 'element');
     };
     
-    module.ContentTrans.prototype.implicitTvar = function(node, view) {
-        if (view !== null) {
-            // data-view exists on element, use name as tvar name
-            return view.objName;
+    module.ContentTrans.prototype.implicitTvar = function(node, render) {
+        if (render !== null) {
+            // data-render exists on element, use name as tvar name
+            return render.objName;
         }
         // only if we have a single text child node that is a variable
         // by itself do we have an implicit tvar
@@ -1540,12 +1578,12 @@ obviel.template = {};
             var tvarInfo = parseTvar(el, tvar);
             tvar = tvarInfo.tvar;
         }
-        var view = null;
-        if (el.hasAttribute('data-view')) {
-            view = new module.ViewElement(el);
+        var render = null;
+        if (el.hasAttribute('data-render')) {
+            render = new module.RenderElement(el);
         }
         if (tvar === null) {
-            tvar = this.implicitTvar(el, view);
+            tvar = this.implicitTvar(el, render);
             if (tvar === null) {
                 throw new module.CompilationError(
                     el, this.directiveName + " element has sub-elements " +
@@ -1559,7 +1597,7 @@ obviel.template = {};
                 el, "data-tvar must be unique within " +
                     this.directiveName + ": " + tvar);
         }
-        return {tvar: tvar, view: view};
+        return {tvar: tvar, render: render};
     };
 
     module.ContentTrans.prototype.getTvarNode = function(
@@ -1572,8 +1610,8 @@ obviel.template = {};
         var tvarNode = tvarInfo.node.cloneNode(true);
 
         tvarInfo.dynamic.render(tvarNode, scope, context);
-        if (tvarInfo.view !== null) {
-            tvarInfo.view.render(tvarNode, scope, context);
+        if (tvarInfo.render !== null) {
+            tvarInfo.render.render(tvarNode, scope, context);
         }
         return tvarNode;
     };
