@@ -54,6 +54,24 @@ obviel.bootstrap = {};
 
     obviel.view(new module.Container());
 
+    // Heading
+    obviel.iface('heading');
+
+    module.Heading = function (settings) {
+        settings = settings || {};
+        var d = {
+            iface: 'heading',
+            name: 'default',
+            obvt: '<h1>{heading.title}</h1>'
+        };
+        $.extend(d, settings);
+        obviel.View.call(this, d);
+    };
+
+    module.Heading.prototype = new obviel.View();
+
+    obviel.view(new module.Heading());
+
     // Grid
     obviel.iface('grid');
 

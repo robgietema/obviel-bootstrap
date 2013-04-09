@@ -107,6 +107,34 @@ buster.testCase("Obviel Bootstrap Container Tests", {
     }
 });
 
+buster.testCase("Obviel Bootstrap Heading Tests", {
+    setUp: function () {
+        $(document.body).html('<div id="viewdiv"></div>');
+    },
+
+    tearDown: function () {
+        $('#viewdiv').remove();
+    },
+
+    'container constructor exists': function () {
+        assert.isFunction(obviel.bootstrap.Heading);
+    },
+
+    'basic heading': function () {
+        var el = $('#viewdiv');
+
+        el.render({
+            iface: 'heading',
+            heading: {
+                title: 'Test'
+            }
+        });
+
+        assert.equals($('h1', el).length, 1);
+        assert.equals($('h1', el).html(), 'Test');
+    }
+});
+
 buster.testCase("Obviel Bootstrap Grid Tests", {
     setUp: function () {
         $(document.body).html('<div id="viewdiv"></div>');
