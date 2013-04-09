@@ -289,6 +289,35 @@ buster.testCase("Obviel Bootstrap Grid Tests", {
     }
 });
 
+buster.testCase("Obviel Bootstrap Button Tests", {
+    setUp: function () {
+        $(document.body).html('<div id="viewdiv"></div>');
+    },
+
+    tearDown: function () {
+        $('#viewdiv').remove();
+    },
+
+    'container constructor exists': function () {
+        assert.isFunction(obviel.bootstrap.Button);
+    },
+
+    'basic button': function () {
+        var el = $('#viewdiv');
+
+        el.render({
+            iface: 'button',
+            button: {
+                title: 'Test'
+            }
+        });
+
+        assert.equals($('button', el).length, 1);
+        assert($('button', el).hasClass('btn'));
+        assert.equals($('button', el).html(), 'Test');
+    }
+});
+
 buster.testCase("Obviel Bootstrap Table Tests", {
     setUp: function () {
         $(document.body).html('<div id="viewdiv"></div>');

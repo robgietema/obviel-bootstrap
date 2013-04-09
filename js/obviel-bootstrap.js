@@ -111,6 +111,24 @@ obviel.bootstrap = {};
 
     obviel.view(new module.Grid());
 
+    // Button
+    obviel.iface('button');
+
+    module.Button = function (settings) {
+        settings = settings || {};
+        var d = {
+            iface: 'button',
+            name: 'default',
+            obvt: '<button class="btn">{button.title}</button>'
+        };
+        $.extend(d, settings);
+        obviel.View.call(this, d);
+    };
+
+    module.Button.prototype = new obviel.View();
+
+    obviel.view(new module.Button());
+
     // Table
     obviel.iface('table');
 
