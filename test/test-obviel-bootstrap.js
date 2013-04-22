@@ -757,8 +757,8 @@ buster.testCase("Obviel Bootstrap Navbar Tests", {
             }
         });
 
-        assert.equals($('a.brand', el).length, 1);
-        assert.equals($('a.brand', el).html(), 'Some Brand');
+        assert.equals($('a.navbar-brand', el).length, 1);
+        assert.equals($('a.navbar-brand', el).html(), 'Some Brand');
     },
 
     'nav inside the navbar': function () {

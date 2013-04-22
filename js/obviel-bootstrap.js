@@ -54,24 +54,6 @@ obviel.bootstrap = {};
 
     obviel.view(new module.Container());
 
-    // Heading
-    obviel.iface('heading');
-
-    module.Heading = function (settings) {
-        settings = settings || {};
-        var d = {
-            iface: 'heading',
-            name: 'default',
-            obvt: '<h1>{heading.title}</h1>'
-        };
-        $.extend(d, settings);
-        obviel.View.call(this, d);
-    };
-
-    module.Heading.prototype = new obviel.View();
-
-    obviel.view(new module.Heading());
-
     // Grid
     obviel.iface('grid');
 
@@ -110,24 +92,6 @@ obviel.bootstrap = {};
     module.Grid.prototype = new obviel.View();
 
     obviel.view(new module.Grid());
-
-    // Button
-    obviel.iface('button');
-
-    module.Button = function (settings) {
-        settings = settings || {};
-        var d = {
-            iface: 'button',
-            name: 'default',
-            obvt: '<button class="btn">{button.title}</button>'
-        };
-        $.extend(d, settings);
-        obviel.View.call(this, d);
-    };
-
-    module.Button.prototype = new obviel.View();
-
-    obviel.view(new module.Button());
 
     // Table
     obviel.iface('table');
@@ -340,7 +304,7 @@ obviel.bootstrap = {};
                 '<div class="navbar" data-call="optionals">' +
                 '  <div class="navbar-inner">' +
                 '    <div class="container">' +
-                '      <a class="btn btn-navbar"' +
+                '      <a class="btn navbar-toggle collapsed"' +
                 '         data-toggle="collapse"' +
                 '         data-target=".nav-collapse">' +
                 '        <span class="icon-bar"></span>' +
@@ -348,9 +312,9 @@ obviel.bootstrap = {};
                 '        <span class="icon-bar"></span>' +
                 '      </a>' +
                 '      <a href="#"' +
-                '         class="brand"' +
+                '         class="navbar-brand"' +
                 '         data-if="navbar.brand">{navbar.brand}</a>' +
-                '      <div class="nav-collapse"' +
+                '      <div class="nav-collapse collapse"' +
                 '           data-if="navbar.parts"' +
                 '           data-repeat="navbar.parts"' +
                 '           data-render="@."></div>' +
