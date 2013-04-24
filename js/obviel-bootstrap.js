@@ -548,11 +548,7 @@ obviel.bootstrap = {};
     module.NavDivider.prototype = new obviel.View();
 
     module.NavDivider.prototype.render = function () {
-        if (this.el.parent().hasClass('dropdown-menu')) {
-            this.el.addClass('divider');
-        } else {
-            this.el.addClass('divider-vertical');
-        }
+        this.el.addClass('divider');
     };
 
     obviel.view(new module.NavDivider());
