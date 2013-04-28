@@ -489,6 +489,9 @@ obviel.bootstrap = {};
         if (obj.items) {
             self.el.addClass('dropdown-submenu');
         }
+        if (obj.classname) {
+            self.el.addClass(obj.classname);
+        }
     };
 
     obviel.view(new module.NavLink());
