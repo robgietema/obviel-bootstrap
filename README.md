@@ -4,4 +4,4 @@
 
 **obviel-bootstrap** is an integration of the Bootstrap CSS and Javascript framework with Obviel.
 
-This package provides Obviel controls for the most common Bootstrap controls like grids, table, navbars, tabs and alerts.
+This package provides Obviel controls for the most common Bootstrap controls like grids, tables, navbars, tabs and alerts.
