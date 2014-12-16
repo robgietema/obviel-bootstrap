@@ -2,4 +2,6 @@
 
 [![Build status](https://secure.travis-ci.org/robgietema/obviel-bootstrap.png?branch=master)](http://travis-ci.org/robgietema/obviel-bootstrap/)
 
-Bootstrap integration for Obviel
+**obviel-bootstrap** is an integration of the Bootstrap CSS and Javascript framework with Obviel.
+
+This package provides Obviel controls for the most common Bootstrap controls like grids, table, navbars, tabs and alerts.
