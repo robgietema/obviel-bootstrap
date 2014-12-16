@@ -107,34 +107,6 @@ buster.testCase("Obviel Bootstrap Container Tests", {
     }
 });
 
-buster.testCase("Obviel Bootstrap Heading Tests", {
-    setUp: function () {
-        $(document.body).html('<div id="viewdiv"></div>');
-    },
-
-    tearDown: function () {
-        $('#viewdiv').remove();
-    },
-
-    'container constructor exists': function () {
-        assert.isFunction(obviel.bootstrap.Heading);
-    },
-
-    'basic heading': function () {
-        var el = $('#viewdiv');
-
-        el.render({
-            iface: 'heading',
-            heading: {
-                title: 'Test'
-            }
-        });
-
-        assert.equals($('h1', el).length, 1);
-        assert.equals($('h1', el).html(), 'Test');
-    }
-});
-
 buster.testCase("Obviel Bootstrap Grid Tests", {
     setUp: function () {
         $(document.body).html('<div id="viewdiv"></div>');
@@ -286,35 +258,6 @@ buster.testCase("Obviel Bootstrap Grid Tests", {
         });
 
         assert($('div.row div', el).hasClass('offset4'));
-    }
-});
-
-buster.testCase("Obviel Bootstrap Button Tests", {
-    setUp: function () {
-        $(document.body).html('<div id="viewdiv"></div>');
-    },
-
-    tearDown: function () {
-        $('#viewdiv').remove();
-    },
-
-    'container constructor exists': function () {
-        assert.isFunction(obviel.bootstrap.Button);
-    },
-
-    'basic button': function () {
-        var el = $('#viewdiv');
-
-        el.render({
-            iface: 'button',
-            button: {
-                title: 'Test'
-            }
-        });
-
-        assert.equals($('button', el).length, 1);
-        assert($('button', el).hasClass('btn'));
-        assert.equals($('button', el).html(), 'Test');
     }
 });
 
@@ -881,7 +824,7 @@ buster.testCase("Obviel Bootstrap Navbar Tests", {
             iface: 'navDivider'
         });
 
-        assert(li.hasClass('divider-vertical'));
+        assert(li.hasClass('divider'));
     },
 
     'navDivider in dropdown': function () {
